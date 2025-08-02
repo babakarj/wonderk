@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WonderK.Departement.Insurance": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

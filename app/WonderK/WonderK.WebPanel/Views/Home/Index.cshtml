@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Chunked XML Upload</h2>
+
+            <div class="mb-3">
+                <label for="xmlFile" class="form-label">Select XML File</label>
+                <input class="form-control" type="file" id="xmlFile" />
+            </div>
+
+            <button id="btnStart" class="btn btn-primary">Start Upload &amp; Process</button>
+
+            <div id="progressUploadContainer" class="mt-4" style="display:none;">
+                <h6>Overall Upload Progress</h6>
+                <div class="progress">
+                    <div id="progressUpload"
+                         class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar"
+                         style="width: 0%"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        0%
+                    </div>
+                </div>
+            </div>
+
+            <div id="progressContainer" class="mt-4" style="display:none;">
+                <h6>Overall Queue To Progress</h6>
+                <div class="progress">
+                    <div id="progressbar"
+                         class="progress-bar progress-bar-striped progress-bar-animated"
+                         role="progressbar"
+                         style="width: 0%"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        0%
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (async function(){
+          const CHUNK_SIZE = 1024 * 1024; // 1 MB
+
+          document.getElementById("btnStart").onclick = async () => {
+            const fileInput = document.getElementById("xmlFile");
+            if (!fileInput.files.length) {
+              const toast = new bootstrap.Toast(
+                Object.assign(document.createElement('div'), {
+                  className: 'toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3',
+                  innerHTML: `
+                    <div class="d-flex">
+                      <div class="toast-body">
+                        <strong>Error:</strong> No file selected.<br>
+                        Please choose an XML file to upload before starting the process.
+                      </div>
+                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>`
+                })
+              );
+              document.body.appendChild(toast._element);
+              toast.show();
+              return;
+            }
+            const file = fileInput.files[0];
+
+            // create jobId
+            const createResp = await fetch("@Url.Action("Upload")", { method: "POST", body: new FormData() });
+            if (!createResp.ok) {
+              alert("Failed to start job.");
+              return;
+            }
+            const { jobId } = await createResp.json();
+
+            console.log("Job ID:", jobId);
+
+            // show the upload progress UI
+            const containerUpload = document.getElementById("progressUploadContainer");
+            const barUpload = document.getElementById("progressUpload");
+            containerUpload.style.display = "block";
+
+            // upload chunks
+            const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+            for (let idx = 0; idx < totalChunks; idx++) {
+              const start = idx * CHUNK_SIZE;
+              const slice = file.slice(start, start + CHUNK_SIZE);
+
+              const fd = new FormData();
+              fd.append("jobId", jobId);
+              fd.append("chunkIndex", idx);
+              fd.append("totalChunks", totalChunks);
+              fd.append("chunk", slice, file.name);
+
+              const resp = await fetch("@Url.Action("UploadChunk")", {
+                method: "POST", body: fd
+              });
+              if (!resp.ok) {
+                alert("Chunk upload failed at index " + idx);
+                return;
+              }
+
+              // upload progress
+              const uplPct = Math.round(((idx + 1) / totalChunks) * 100);
+              barUpload.style.width = uplPct + "%";
+              barUpload.textContent = uplPct + "%";
+            }
+
+            // show the progress UI
+            const container = document.getElementById("progressContainer");
+            const bar = document.getElementById("progress");
+            container.style.display = "block";
+
+            // poll for processing progress
+            const poll = setInterval(async () => {
+              const pr = await fetch("@Url.Action("Progress")?jobId=" + jobId);
+              if (pr.status === 404) {
+                clearInterval(poll);
+                bar.style.width = "100%";
+                bar.textContent = "100%";
+                bar.classList.remove("progress-bar-animated");
+                return;
+              }
+              const { percent } = await pr.json();
+              console.log("Progress:", percent);
+              const overall = Math.round(percent);
+              bar.style.width = overall + "%";
+              bar.textContent = overall + "%";
+            }, 500);
+          };
+        })();
+    </script>
+}

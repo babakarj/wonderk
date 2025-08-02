@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WonderK.RuleChecker": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

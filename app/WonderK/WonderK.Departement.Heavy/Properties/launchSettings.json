@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "WonderK.Departement.Heavy": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
