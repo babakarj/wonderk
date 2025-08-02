@@ -1,7 +1,7 @@
 ﻿using WonderK.Common.Data;
 using WonderK.Common.Libraries;
 
-namespace WonderK.Departement.Heavy
+namespace WonderK.Department.Heavy
 {
     public class HeavyConsumer(IQueueProcessor queue) : Consumer(queue)
     {

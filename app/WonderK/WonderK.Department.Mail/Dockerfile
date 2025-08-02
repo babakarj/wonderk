@@ -10,19 +10,19 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["WonderK.Departement.Mail/WonderK.Departement.Mail.csproj", "WonderK.Departement.Mail/"]
-RUN dotnet restore "./WonderK.Departement.Mail/WonderK.Departement.Mail.csproj"
+COPY ["WonderK.Department.Mail/WonderK.Department.Mail.csproj", "WonderK.Department.Mail/"]
+RUN dotnet restore "./WonderK.Department.Mail/WonderK.Department.Mail.csproj"
 COPY . .
-WORKDIR "/src/WonderK.Departement.Mail"
-RUN dotnet build "./WonderK.Departement.Mail.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/WonderK.Department.Mail"
+RUN dotnet build "./WonderK.Department.Mail.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./WonderK.Departement.Mail.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./WonderK.Department.Mail.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WonderK.Departement.Mail.dll"]
+ENTRYPOINT ["dotnet", "WonderK.Department.Mail.dll"]

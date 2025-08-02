@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "WonderK.Departement.Regular": {
+    "WonderK.Department.Mail": {
       "commandName": "Project"
     },
     "Container (Dockerfile)": {

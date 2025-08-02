@@ -1,15 +1,15 @@
 ﻿using WonderK.Common.Data;
 using WonderK.Common.Libraries;
 
-namespace WonderK.Departement.Regular
+namespace WonderK.Department.Mail
 {
-    public class RegularConsumer(IQueueProcessor queue) : Consumer(queue)
+    public class MailConsumer(IQueueProcessor queue) : Consumer(queue)
     {
         public override void Process(Package package)
         {
             base.Process(package);
 
-            Console.WriteLine($"Regular consumed package: {package}");
+            Console.WriteLine($"Mail consumed package: {package}");
         }
     }
 }

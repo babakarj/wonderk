@@ -1,7 +1,7 @@
 ﻿using WonderK.Common.Libraries;
-using WonderK.Departement.Insurance;
+using WonderK.Department.Regular;
 
-const string DepartmentName = "Insurance";
+const string DepartmentName = "Regular";
 
 Console.WriteLine($"Hello, from {DepartmentName} department!");
 
@@ -10,5 +10,5 @@ string streamKey = $"{DepartmentName}-stream";
 string groupName = $"{DepartmentName}-consumer-group";
 string consumerName = "processor-1";
 
-InsuranceConsumer consumer = new(queue);
+RegularConsumer consumer = new(queue);
 await consumer.Listen(streamKey, groupName, consumerName);

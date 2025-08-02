@@ -9,15 +9,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.WebPanel", "WonderK
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Common", "WonderK.Common\WonderK.Common.csproj", "{99520E02-654C-4566-B851-33B4AB4F50FE}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Departements", "Departements", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Departments", "Departments", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Departement.Mail", "WonderK.Departement.Mail\WonderK.Departement.Mail.csproj", "{CBB9646B-2044-445D-8EE6-E4FE7D62B8D9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Department.Mail", "WonderK.Department.Mail\WonderK.Department.Mail.csproj", "{CBB9646B-2044-445D-8EE6-E4FE7D62B8D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Departement.Regular", "WonderK.Departement.Regular\WonderK.Departement.Regular.csproj", "{C9549D8F-2D22-4E15-A45D-5A9895277A8A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Department.Regular", "WonderK.Department.Regular\WonderK.Department.Regular.csproj", "{C9549D8F-2D22-4E15-A45D-5A9895277A8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Departement.Insurance", "WonderK.Departement.Insurance\WonderK.Departement.Insurance.csproj", "{95253840-D431-4943-A429-FAC1320EE5B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Department.Insurance", "WonderK.Department.Insurance\WonderK.Department.Insurance.csproj", "{95253840-D431-4943-A429-FAC1320EE5B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Departement.Heavy", "WonderK.Departement.Heavy\WonderK.Departement.Heavy.csproj", "{6112C3A1-DDA9-484A-998B-BF66FF6CE04D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Department.Heavy", "WonderK.Department.Heavy\WonderK.Department.Heavy.csproj", "{6112C3A1-DDA9-484A-998B-BF66FF6CE04D}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject

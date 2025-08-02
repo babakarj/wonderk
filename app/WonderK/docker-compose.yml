@@ -19,8 +19,8 @@ services:
       context: .
       dockerfile: WonderK.RuleChecker/Dockerfile
 
-  wonderk.departementheavy:
-    image: ${DOCKER_REGISTRY-}departementheavy
+  wonderk.departmentheavy:
+    image: ${DOCKER_REGISTRY-}departmentheavy
     depends_on:
       redis:
         condition: service_started
@@ -31,10 +31,10 @@ services:
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.Departement.Heavy/Dockerfile
+      dockerfile: WonderK.department.Heavy/Dockerfile
 
-  wonderk.departementinsurance:
-    image: ${DOCKER_REGISTRY-}departementinsurance
+  wonderk.departmentinsurance:
+    image: ${DOCKER_REGISTRY-}departmentinsurance
     depends_on:
       redis:
         condition: service_started
@@ -45,10 +45,10 @@ services:
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.Departement.Insurance/Dockerfile
+      dockerfile: WonderK.department.Insurance/Dockerfile
 
-  wonderk.departementmail:
-    image: ${DOCKER_REGISTRY-}departementmail
+  wonderk.departmentmail:
+    image: ${DOCKER_REGISTRY-}departmentmail
     depends_on:
       redis:
         condition: service_started
@@ -59,10 +59,10 @@ services:
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.Departement.Mail/Dockerfile
+      dockerfile: WonderK.department.Mail/Dockerfile
 
-  wonderk.departementregular:
-    image: ${DOCKER_REGISTRY-}departementregular
+  wonderk.departmentregular:
+    image: ${DOCKER_REGISTRY-}departmentregular
     depends_on:
       redis:
         condition: service_started
@@ -73,7 +73,7 @@ services:
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.Departement.Regular/Dockerfile
+      dockerfile: WonderK.department.Regular/Dockerfile
 
   redis:
      image: redis

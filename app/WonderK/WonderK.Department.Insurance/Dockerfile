@@ -10,19 +10,19 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["WonderK.Departement.Heavy/WonderK.Departement.Heavy.csproj", "WonderK.Departement.Heavy/"]
-RUN dotnet restore "./WonderK.Departement.Heavy/WonderK.Departement.Heavy.csproj"
+COPY ["WonderK.Department.Insurance/WonderK.Department.Insurance.csproj", "WonderK.Department.Insurance/"]
+RUN dotnet restore "./WonderK.Department.Insurance/WonderK.Department.Insurance.csproj"
 COPY . .
-WORKDIR "/src/WonderK.Departement.Heavy"
-RUN dotnet build "./WonderK.Departement.Heavy.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/WonderK.Department.Insurance"
+RUN dotnet build "./WonderK.Department.Insurance.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./WonderK.Departement.Heavy.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./WonderK.Department.Insurance.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "WonderK.Departement.Heavy.dll"]
+ENTRYPOINT ["dotnet", "WonderK.Department.Insurance.dll"]
