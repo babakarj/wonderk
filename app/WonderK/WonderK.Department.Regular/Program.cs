@@ -6,6 +6,7 @@ const string DepartmentName = "Regular";
 Console.WriteLine($"Hello, from {DepartmentName} department!");
 
 IQueueProcessor queue = new RedisQueueProcessor();
+
 string streamKey = $"{DepartmentName}-stream";
 string groupName = $"{DepartmentName}-consumer-group";
 string consumerName = "rg-" + Guid.NewGuid().ToString();
