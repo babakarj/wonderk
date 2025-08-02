@@ -9,7 +9,7 @@ IQueueProcessor queue = new RedisQueueProcessor();
 
 string streamKey = $"{DepartmentName}-stream";
 string groupName = $"{DepartmentName}-consumer-group";
-string consumerName = "processor-1";
+string consumerName = "heavy-" + Guid.NewGuid().ToString();
 
 HeavyConsumer consumer = new(queue);
 await consumer.Listen(streamKey, groupName, consumerName);

@@ -1,20 +1,26 @@
 services:
   wonderk.webpanel:
     image: ${DOCKER_REGISTRY-}wonderkwebpanel
+    depends_on:
+      wonderk.rulechecker:
+        condition: service_healthy
     build:
       context: .
       dockerfile: WonderK.WebPanel/Dockerfile
 
   wonderk.rulechecker:
     image: ${DOCKER_REGISTRY-}rulechecker
+    deploy:
+      replicas: 3
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "pgrep", "dotnet"]
+      test: [ "CMD", "pgrep", "dotnet" ]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
+      start_period: 10s
     build:
       context: .
       dockerfile: WonderK.RuleChecker/Dockerfile
@@ -23,57 +29,65 @@ services:
     image: ${DOCKER_REGISTRY-}departmentheavy
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "pgrep", "dotnet"]
+      test: [ "CMD", "pgrep", "dotnet" ]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.department.Heavy/Dockerfile
+      dockerfile: WonderK.Department.Heavy/Dockerfile
 
   wonderk.departmentinsurance:
     image: ${DOCKER_REGISTRY-}departmentinsurance
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "pgrep", "dotnet"]
+      test: [ "CMD", "pgrep", "dotnet" ]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.department.Insurance/Dockerfile
+      dockerfile: WonderK.Department.Insurance/Dockerfile
 
   wonderk.departmentmail:
     image: ${DOCKER_REGISTRY-}departmentmail
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "pgrep", "dotnet"]
+      test: [ "CMD", "pgrep", "dotnet" ]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.department.Mail/Dockerfile
+      dockerfile: WonderK.Department.Mail/Dockerfile
 
   wonderk.departmentregular:
     image: ${DOCKER_REGISTRY-}departmentregular
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "pgrep", "dotnet"]
+      test: [ "CMD", "pgrep", "dotnet" ]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
     build:
       context: .
-      dockerfile: WonderK.department.Regular/Dockerfile
+      dockerfile: WonderK.Department.Regular/Dockerfile
 
   redis:
-     image: redis
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

@@ -20,7 +20,7 @@ var rules = ParseRules(ruleText);
 
 string streamKey = "parcel-stream";
 string groupName = "rule-checker-group";
-string consumerName = "processor-1";
+string consumerName = "rc-" + Guid.NewGuid().ToString();
 
 await queue.Consume(streamKey, groupName, consumerName, async (data) =>
 {

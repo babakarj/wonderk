@@ -8,7 +8,7 @@ Console.WriteLine($"Hello, from {DepartmentName} department!");
 IQueueProcessor queue = new RedisQueueProcessor();
 string streamKey = $"{DepartmentName}-stream";
 string groupName = $"{DepartmentName}-consumer-group";
-string consumerName = "processor-1";
+string consumerName = "ins-" + Guid.NewGuid().ToString();
 
 InsuranceConsumer consumer = new(queue);
 await consumer.Listen(streamKey, groupName, consumerName);

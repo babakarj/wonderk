@@ -2,6 +2,10 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+
+USER root
+RUN apt-get update && apt-get install -y procps
+
 USER $APP_UID
 WORKDIR /app
 
