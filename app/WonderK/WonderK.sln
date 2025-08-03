@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36327.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.RuleChecker", "WonderK.RuleChecker\WonderK.RuleChecker.csproj", "{526CE661-E4A5-4A11-920E-B431E4F0E7C6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.WebPanel", "WonderK.WebPanel\WonderK.WebPanel.csproj", "{C623961A-BC3E-45B1-9033-4C9E7617F418}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.Common", "WonderK.Common\WonderK.Common.csproj", "{99520E02-654C-4566-B851-33B4AB4F50FE}"
@@ -23,16 +21,14 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wonderk.Tests", "..\Wonderk.Tests\Wonderk.Tests.csproj", "{D94CE813-E0BB-47DA-AC06-E3D4AF06F69C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WonderK.RuleChecker", "WonderK.RuleChecker\WonderK.RuleChecker.csproj", "{2D79756A-7A81-4A51-A7E4-30D9CB2EBFA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{526CE661-E4A5-4A11-920E-B431E4F0E7C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{526CE661-E4A5-4A11-920E-B431E4F0E7C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{526CE661-E4A5-4A11-920E-B431E4F0E7C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{526CE661-E4A5-4A11-920E-B431E4F0E7C6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C623961A-BC3E-45B1-9033-4C9E7617F418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C623961A-BC3E-45B1-9033-4C9E7617F418}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C623961A-BC3E-45B1-9033-4C9E7617F418}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -65,6 +61,10 @@ Global
 		{D94CE813-E0BB-47DA-AC06-E3D4AF06F69C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D94CE813-E0BB-47DA-AC06-E3D4AF06F69C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D94CE813-E0BB-47DA-AC06-E3D4AF06F69C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D79756A-7A81-4A51-A7E4-30D9CB2EBFA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D79756A-7A81-4A51-A7E4-30D9CB2EBFA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D79756A-7A81-4A51-A7E4-30D9CB2EBFA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D79756A-7A81-4A51-A7E4-30D9CB2EBFA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

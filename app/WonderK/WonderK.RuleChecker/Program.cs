@@ -1,39 +1,35 @@
-﻿using System.Xml.Serialization;
-using WonderK.Common.Data;
 using WonderK.Common.Libraries;
 using WonderK.RuleChecker;
 
-Console.WriteLine("Hello, from WonderK.RuleChecker!");
+var builder = WebApplication.CreateBuilder(args);
 
-string ruleText = File.ReadAllText("Rules.txt");
-List<Rule> rules = Rule.ParseRules(ruleText);
+// Add services to the container.
+builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<IQueueProcessor, RedisQueueProcessor>();
+builder.Services.AddHostedService<QueueWorker>();
+builder.Services.AddControllersWithViews();
 
-IQueueProcessor queue = new RedisQueueProcessor();
+var app = builder.Build();
 
-string streamKey = "parcel-stream";
-string groupName = "rule-checker-group";
-string consumerName = "rc-" + Guid.NewGuid().ToString();
-
-await queue.Consume(streamKey, groupName, consumerName, async (data) =>
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
 {
-    XmlSerializer serializer = new(typeof(Parcel));
-    using StringReader reader = new(data);
-    Parcel parcel = (Parcel)serializer.Deserialize(reader);
-    Console.WriteLine($"Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
-
-    var departments = rules.GetDepartments(parcel);
-    Console.WriteLine("Matching departments: " + string.Join(", ", departments));
-
-    await Send(parcel, departments);
-});
-
-async Task Send(Parcel parcel, HashSet<string> departments)
-{
-    Package package = new(parcel, departments);
-
-    string streamKey = departments.First() + "-stream";
-
-    string messageId = await queue.Produce(streamKey, package.ToString());
-
-    Console.WriteLine($"Message added to stream with ID: {messageId}");
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHealthChecks("/healthcheck");
+
+app.Run();

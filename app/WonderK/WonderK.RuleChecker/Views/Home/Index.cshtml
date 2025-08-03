@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Rules</h2>
+        </div>
+        <div class="card-body">
+            <pre class="bg-light p-3 rounded border">
+@ViewBag.FileContent
+            </pre>
+        </div>
+    </div>
+</div>
