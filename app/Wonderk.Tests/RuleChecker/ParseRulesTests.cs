@@ -17,7 +17,77 @@ namespace Wonderk.Tests.RuleChecker
             Assert.That(rule.Name, Is.EqualTo("Dept1"));
             Assert.That(rule.Property, Is.EqualTo("value"));
             Assert.That(rule.Operator, Is.EqualTo(">"));
-            Assert.That(rule.Value, Is.EqualTo(1000));
+            Assert.That(rule.Value, Is.EqualTo("1000"));
+        }
+
+        [Test]
+        public void ParseRules_DuplicateRules_BothParsed()
+        {
+            var ruleText = "Dept1:value = 100\nDept1:value = 100";
+            var rules = Rule.ParseRules(ruleText);
+            Assert.That(rules, Has.Count.EqualTo(2));
+        }
+
+        [Test]
+        public void ParseRules_QuotedNumericValue_ParsesAsString()
+        {
+            var ruleText = "Dept1:value = \"1000\"";
+            var rules = Rule.ParseRules(ruleText);
+            Assert.That(rules, Has.Count.EqualTo(1));
+            Assert.That(rules[0].Value, Is.EqualTo("1000"));
+        }
+
+        [Test]
+        public void ParseRules_ExtremeNumericValues_ParsesCorrectly()
+        {
+            var ruleText = "Dept1:value > 999999.999999\nDept2:weight < -999999.999999";
+            var rules = Rule.ParseRules(ruleText);
+            Assert.That(rules, Has.Count.EqualTo(2));
+            Assert.That(rules[0].Value, Is.EqualTo("999999.999999"));
+            Assert.That(rules[1].Value, Is.EqualTo("-999999.999999"));
+        }
+
+        [Test]
+        public void ParseRules_MixedLineEndings_ParsesAll()
+        {
+            var ruleText = "Dept1:value = 1\r\nDept2:weight = 2\nDept3:value = 3";
+            var rules = Rule.ParseRules(ruleText);
+            Assert.That(rules, Has.Count.EqualTo(3));
+            Assert.That(rules[0].Name, Is.EqualTo("Dept1"));
+            Assert.That(rules[1].Name, Is.EqualTo("Dept2"));
+            Assert.That(rules[2].Name, Is.EqualTo("Dept3"));
+        }
+
+        [Test]
+        public void ParseRules_InvalidCharactersInName_Throws()
+        {
+            var ruleText = "Dept$:value = 100";
+            Assert.Throws<FormatException>(() => Rule.ParseRules(ruleText));
+        }
+
+        [TestCase("Hello")]
+        [TestCase("Dept1:value")]
+        [TestCase("Dept1:value>")]
+        [TestCase("Dept1:value>ten")]
+        [TestCase("Dept1:value>abc")]
+        [TestCase("Dept1:value>1e10")]
+        [TestCase("InvalidRuleFormat\nValid:value = 123.45")]
+        [TestCase("Dept1:value > abc\nDept2:weight < xyz\nDept3:value >= 100\nDept4:weight <= 200")]
+        public void ParseRules_InvalidRule(string ruleText)
+        {
+            Assert.Throws<FormatException>(() => Rule.ParseRules(ruleText));
+        }
+
+        [TestCase("Dept1:  value   >   1000")]
+        [TestCase("Dept1: \t value \t  > \t  1000")]
+        public void ParseRules_WhitespaceAroundTokens_ParsesCorrectly(string ruleText)
+        {
+            var rules = Rule.ParseRules(ruleText);
+            Assert.That(rules, Has.Count.EqualTo(1));
+            Assert.That(rules[0].Name, Is.EqualTo("Dept1"));
+            Assert.That(rules[0].Property, Is.EqualTo("value"));
+            Assert.That(rules[0].Operator, Is.EqualTo(">"));
+            Assert.That(rules[0].Value, Is.EqualTo("1000"));
         }
 
         [Test]
@@ -32,14 +102,13 @@ namespace Wonderk.Tests.RuleChecker
             Assert.That(rules[0].Name, Is.EqualTo("Dept1"));
             Assert.That(rules[0].Property, Is.EqualTo("weight"));
             Assert.That(rules[0].Operator, Is.EqualTo(">="));
-            Assert.That(rules[0].Value, Is.EqualTo(10));
+            Assert.That(rules[0].Value, Is.EqualTo("10"));
 
             Assert.That(rules[1].Name, Is.EqualTo("Dept2"));
             Assert.That(rules[1].Property, Is.EqualTo("value"));
             Assert.That(rules[1].Operator, Is.EqualTo("<"));
-            Assert.That(rules[1].Value, Is.EqualTo(50));
+            Assert.That(rules[1].Value, Is.EqualTo("50"));
         }
-
 
         [Test]
         public void ParseRules_PropertyValue_CaseInsensitive()
@@ -69,50 +138,20 @@ namespace Wonderk.Tests.RuleChecker
             Assert.That(rules[3].Property.ToLower(), Is.EqualTo("weight"));
         }
 
-        [Test]
-        public void ParseRules_InvalidRule_IgnoresInvalidLine()
+        [TestCase("Invalid:theAnswer = 42")]
+        [TestCase("Invalid:theAnswer = 42\nValid:value = 123.45")]
+        [TestCase("Valid:value = 123.45\nInvalid:theAnswer = 42")]
+        public void ParseRules_InvalidProperty(string ruleText)
         {
-            var ruleText = "InvalidRuleFormat\nValid:value = 123.45";
-
-            var rules = Rule.ParseRules(ruleText);
-
-            Assert.That(rules, Has.Count.EqualTo(1));
-            Assert.That(rules[0].Name, Is.EqualTo("Valid"));
-            Assert.That(rules[0].Property, Is.EqualTo("value"));
-            Assert.That(rules[0].Operator, Is.EqualTo("="));
-            Assert.That(rules[0].Value, Is.EqualTo(123.45));
+            Assert.Throws<ArgumentException>(() => Rule.ParseRules(ruleText));
         }
 
-        [Test]
-        public void ParseRules_InvalidOperator()
+        [TestCase("Invalid:value != 42")]
+        [TestCase("Invalid:value != 42\nValid:value = 123.45")]
+        [TestCase("Valid:value = 123.45\nInvalid:value != 42")]
+        public void ParseRules_InvalidOperator(string ruleText)
         {
-            // Operator != is not supported, should be ignored
-            var ruleText = "Invalid:value != 42\nValid:value = 123.45";
-
-            var rules = Rule.ParseRules(ruleText);
-
-            // Invalid operator should be ignored
-            Assert.That(rules, Has.Count.EqualTo(1));
-            Assert.That(rules[0].Name, Is.EqualTo("Valid"));
-            Assert.That(rules[0].Property, Is.EqualTo("value"));
-            Assert.That(rules[0].Operator, Is.EqualTo("="));
-            Assert.That(rules[0].Value, Is.EqualTo(123.45));
-        }
-
-        [Test]
-        public void ParseRules_InvalidProperty()
-        {
-            // Property 'theAnswer' is not valid, should be ignored
-            var ruleText = "Invalid:theAnswer = 42\nValid:value = 123.45";
-
-            var rules = Rule.ParseRules(ruleText);
-            
-            Assert.That(rules, Has.Count.EqualTo(1));
-
-            Assert.That(rules[0].Name, Is.EqualTo("Valid"));
-            Assert.That(rules[0].Property, Is.EqualTo("value"));
-            Assert.That(rules[0].Operator, Is.EqualTo("="));
-            Assert.That(rules[0].Value, Is.EqualTo(123.45));
+            Assert.Throws<ArgumentException>(() => Rule.ParseRules(ruleText));
         }
 
         [Test]
@@ -126,52 +165,56 @@ namespace Wonderk.Tests.RuleChecker
         }
 
         [Test]
-        public void ParseRules_ValueIsNotNumber_IgnoresRule()
+        public void ParseRules_ReceipientName_ParsesCorrectly()
         {
-            var ruleText = "Dept1:value > abc\nDept2:value < 50";
+            var ruleText = "Dept1:receipient.name = \"Ford Prefect\"";
 
             var rules = Rule.ParseRules(ruleText);
 
-            // Only the valid rule should be parsed
             Assert.That(rules, Has.Count.EqualTo(1));
-            Assert.That(rules[0].Name, Is.EqualTo("Dept2"));
-            Assert.That(rules[0].Property.ToLower(), Is.EqualTo("value"));
-            Assert.That(rules[0].Operator, Is.EqualTo("<"));
-            Assert.That(rules[0].Value, Is.EqualTo(50));
+            var rule = rules[0];
+            Assert.That(rule.Name, Is.EqualTo("Dept1"));
+            Assert.That(rule.Property.ToLower(), Is.EqualTo("receipient.name"));
+            Assert.That(rule.Operator, Is.EqualTo("="));
+            Assert.That(rule.Value, Is.EqualTo("Ford Prefect"));
         }
 
         [Test]
-        public void ParseRules_WeightIsNotNumber_IgnoresRule()
+        public void ParseRules_EscapedQuotesInStringValue_NotAllowed()
         {
-            var ruleText = "Dept1:weight >= ten\nDept2:weight < 5";
-
-            var rules = Rule.ParseRules(ruleText);
-
-            // Only the valid rule should be parsed
-            Assert.That(rules, Has.Count.EqualTo(1));
-            Assert.That(rules[0].Name, Is.EqualTo("Dept2"));
-            Assert.That(rules[0].Property.ToLower(), Is.EqualTo("weight"));
-            Assert.That(rules[0].Operator, Is.EqualTo("<"));
-            Assert.That(rules[0].Value, Is.EqualTo(5));
+            var ruleText = "Dept1:receipient.name = \"Ford \\\"Prefect\\\"\"";
+            Assert.Throws<FormatException>(() => Rule.ParseRules(ruleText));
         }
 
         [Test]
-        public void ParseRules_MixedInvalidNumericValues_OnlyValidRulesParsed()
+        public void ParseRules_ReceipientAddressCity_ParsesCorrectly()
         {
-            var ruleText = "Dept1:value > abc\nDept2:weight < xyz\nDept3:value >= 100\nDept4:weight <= 200";
+            var ruleText = "Dept1:receipient.address.city = \"New York\"";
 
             var rules = Rule.ParseRules(ruleText);
 
-            Assert.That(rules, Has.Count.EqualTo(2));
-            Assert.That(rules[0].Name, Is.EqualTo("Dept3"));
-            Assert.That(rules[0].Property.ToLower(), Is.EqualTo("value"));
-            Assert.That(rules[0].Operator, Is.EqualTo(">="));
-            Assert.That(rules[0].Value, Is.EqualTo(100));
+            Assert.That(rules, Has.Count.EqualTo(1));
+            var rule = rules[0];
+            Assert.That(rule.Name, Is.EqualTo("Dept1"));
+            Assert.That(rule.Property.ToLower(), Is.EqualTo("receipient.address.city"));
+            Assert.That(rule.Operator, Is.EqualTo("="));
+            Assert.That(rule.Value, Is.EqualTo("New York"));
+        }
 
-            Assert.That(rules[1].Name, Is.EqualTo("Dept4"));
-            Assert.That(rules[1].Property.ToLower(), Is.EqualTo("weight"));
-            Assert.That(rules[1].Operator, Is.EqualTo("<="));
-            Assert.That(rules[1].Value, Is.EqualTo(200));
+        [Test]
+        public void ParseRules_MixedReceipientProperties_ParsesAllCorrectly()
+        {
+            var ruleText = "Dept1:receipient.name = \"Alice\"\nDept2:receipient.address.city = \"Seattle\"\nMail: Weight<0.5";
+
+            var rules = Rule.ParseRules(ruleText);
+
+            Assert.That(rules, Has.Count.EqualTo(3));
+            Assert.That(rules[0].Property.ToLower(), Is.EqualTo("receipient.name"));
+            Assert.That(rules[0].Value, Is.EqualTo("Alice"));
+            Assert.That(rules[1].Property.ToLower(), Is.EqualTo("receipient.address.city"));
+            Assert.That(rules[1].Value, Is.EqualTo("Seattle"));
+            Assert.That(rules[2].Property.ToLower(), Is.EqualTo("weight"));
+            Assert.That(rules[2].Value, Is.EqualTo("0.5"));
         }
 
         [Test]
@@ -190,27 +233,27 @@ Heavy: Weight>=10";
             Assert.That(rules[0].Name, Is.EqualTo("Insurance"));
             Assert.That(rules[0].Property.ToLower(), Is.EqualTo("value"));
             Assert.That(rules[0].Operator, Is.EqualTo(">"));
-            Assert.That(rules[0].Value, Is.EqualTo(1000));
+            Assert.That(rules[0].Value, Is.EqualTo("1000"));
 
             Assert.That(rules[1].Name, Is.EqualTo("Mail"));
             Assert.That(rules[1].Property.ToLower(), Is.EqualTo("weight"));
             Assert.That(rules[1].Operator, Is.EqualTo("<"));
-            Assert.That(rules[1].Value, Is.EqualTo(0.5));
+            Assert.That(rules[1].Value, Is.EqualTo("0.5"));
 
             Assert.That(rules[2].Name, Is.EqualTo("Regular"));
             Assert.That(rules[2].Property.ToLower(), Is.EqualTo("weight"));
             Assert.That(rules[2].Operator, Is.EqualTo(">="));
-            Assert.That(rules[2].Value, Is.EqualTo(0.5));
+            Assert.That(rules[2].Value, Is.EqualTo("0.5"));
 
             Assert.That(rules[3].Name, Is.EqualTo("Regular"));
             Assert.That(rules[3].Property.ToLower(), Is.EqualTo("weight"));
             Assert.That(rules[3].Operator, Is.EqualTo("<"));
-            Assert.That(rules[3].Value, Is.EqualTo(10));
+            Assert.That(rules[3].Value, Is.EqualTo("10"));
 
             Assert.That(rules[4].Name, Is.EqualTo("Heavy"));
             Assert.That(rules[4].Property.ToLower(), Is.EqualTo("weight"));
             Assert.That(rules[4].Operator, Is.EqualTo(">="));
-            Assert.That(rules[4].Value, Is.EqualTo(10));
+            Assert.That(rules[4].Value, Is.EqualTo("10"));
         }
     }
 }

@@ -6,22 +6,24 @@ namespace Wonderk.Tests.RuleChecker
     [TestFixture]
     public class RuleEvaluateTests
     {
-        [TestCase("value", ">", 100, 150, true)]
-        [TestCase("value", "<", 100, 50, true)]
-        [TestCase("value", ">=", 100, 100, true)]
-        [TestCase("value", "<=", 100, 100, true)]
-        [TestCase("value", "=", 100, 100, true)]
-        [TestCase("value", "=", 100, 100.0000001, true)] // within tolerance
-        [TestCase("value", "=", 100, 101, false)]
-        [TestCase("weight", ">", 10, 15, true)]
-        [TestCase("weight", "<", 10, 5, true)]
-        [TestCase("weight", ">=", 10, 10, true)]
-        [TestCase("weight", "<=", 10, 10, true)]
-        [TestCase("weight", "=", 10, 10, true)]
-        [TestCase("weight", "=", 10, 9.999999, true)] // within tolerance
-        [TestCase("weight", "=", 10, 11, false)]
+        [TestCase("value", ">", "100", 150, true)]
+        [TestCase("value", "<", "100", 50, true)]
+        [TestCase("value", ">=", "100", 100, true)]
+        [TestCase("value", "<=", "100", 100, true)]
+        [TestCase("value", "=", "100", 100, true)]
+        [TestCase("value", "=", "100", 100.0000001, true)] // within tolerance
+        [TestCase("value", "=", "100", 101, false)]
+        [TestCase("weight", ">", "10", 15, true)]
+        [TestCase("weight", "<", "10", 5, true)]
+        [TestCase("weight", ">=", "10", 10, true)]
+        [TestCase("weight", "<=", "10", 10, true)]
+        [TestCase("weight", "=", "10", 10, true)]
+        [TestCase("weight", "=", "10", 9.999999, true)] // within tolerance
+        [TestCase("weight", "=", "10", 11, false)]
+        [TestCase("value", ">", "100", 99.9999, false)]
+        [TestCase("value", "<", "100", 100.0001, false)]
         public void Evaluate_ValidPropertiesAndOperators_ReturnsExpected(
-            string property, string op, double ruleValue, double parcelValue, bool expected)
+            string property, string op, string ruleValue, double parcelValue, bool expected)
         {
             var rule = new Rule("TestRule", property, op, ruleValue);
             var parcel = new Parcel
@@ -35,16 +37,46 @@ namespace Wonderk.Tests.RuleChecker
             Assert.That(result, Is.EqualTo(expected));
         }
 
+        [TestCase("receipient.name", "=", "Alice", "Alice", "Wonderland", true)]
+        [TestCase("receipient.name", "=", "Bob", "Alice", "Wonderland", false)]
+        [TestCase("receipient.name", "contains", "al", "Alice", "Wonderland", true)]
+        [TestCase("receipient.name", "contains", "lic", "Alice", "Wonderland", true)]
+        [TestCase("receipient.name", "contains", "bob", "Alice", "Wonderland", false)]
+        [TestCase("receipient.address.city", "=", "Wonderland", "Alice", "Wonderland", true)]
+        [TestCase("receipient.address.city", "=", "Oz", "Alice", "Wonderland", false)]
+        [TestCase("receipient.address.city", "contains", "land", "Alice", "Wonderland", true)]
+        [TestCase("receipient.address.city", "contains", "oz", "Alice", "Wonderland", false)]
+        public void Evaluate_StringPropertiesAndStringOperators_ReturnsExpected(
+            string property, string op, string ruleValue, string receipientName, string city, bool expected)
+        {
+            var rule = new Rule("TestRule", property, op, ruleValue);
+            var parcel = new Parcel
+            {
+                Receipient = new Receipient
+                {
+                    Name = receipientName,
+                    Address = new Address
+                    {
+                        City = city
+                    }
+                }
+            };
+
+            var result = rule.Evaluate(parcel);
+
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
         [Test]
         public void GetDepartments_CorrectDepartmentsReturned()
         {
             var rules = new List<Rule>
             {
-                new("Insurance", "Value", ">", 1000),
-                new("Mail", "Weight", "<", 0.5),
-                new("Regular", "Weight", ">=", 0.5),
-                new("Regular", "Weight", "<", 10),
-                new("Heavy", "Weight", ">=", 10)
+                new("Insurance", "Value", ">", "1000"),
+                new("Mail", "Weight", "<", "0.5"),
+                new("Regular", "Weight", ">=", "0.5"),
+                new("Regular", "Weight", "<", "10"),
+                new("Heavy", "Weight", ">=", "10")
             };
 
             // Parcel matches Insurance and Mail
@@ -76,24 +108,6 @@ namespace Wonderk.Tests.RuleChecker
             var parcel6 = new Parcel { Value = 2000, Weight = 15 };
             var depts6 = rules.GetDepartments(parcel6);
             Assert.That(depts6, Is.EquivalentTo(new[] { "Insurance", "Heavy" }));
-        }
-
-        [Test]
-        public void Evaluate_UnknownProperty_ThrowsArgumentException()
-        {
-            var rule = new Rule("TestRule", "unknown", ">", 10);
-            var parcel = new Parcel { Value = 5, Weight = 5 };
-
-            Assert.Throws<ArgumentException>(() => rule.Evaluate(parcel));
-        }
-
-        [Test]
-        public void Evaluate_UnknownOperator_ThrowsArgumentException()
-        {
-            var rule = new Rule("TestRule", "value", "!=", 10);
-            var parcel = new Parcel { Value = 10, Weight = 5 };
-
-            Assert.Throws<ArgumentException>(() => rule.Evaluate(parcel));
         }
     }
 }
