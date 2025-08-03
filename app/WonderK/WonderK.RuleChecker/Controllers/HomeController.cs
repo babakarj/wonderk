@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WonderK.RuleChecker.Models;
+using System.IO;
 
 namespace WonderK.RuleChecker.Controllers
 {
@@ -8,16 +9,18 @@ namespace WonderK.RuleChecker.Controllers
     {
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<HomeController> _logger;
+        private readonly string rulebookFile;
 
         public HomeController(IWebHostEnvironment env, ILogger<HomeController> logger)
         {
             _env = env;
             _logger = logger;
+            rulebookFile = Path.Combine(_env.ContentRootPath, "rules-book.txt");
         }
 
         public IActionResult Index()
         {
-            string filePath = Path.Combine(_env.ContentRootPath, "rules-book.txt");
+            string filePath = rulebookFile;
             string fileContent = System.IO.File.Exists(filePath)
                 ? System.IO.File.ReadAllText(filePath)
                 : "File not found.";
@@ -25,6 +28,28 @@ namespace WonderK.RuleChecker.Controllers
             ViewBag.FileContent = fileContent;
 
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult EditRuleBook(string fileContent)
+        {
+            try
+            {
+                _ = Rule.ParseRules(fileContent);
+
+                System.IO.File.WriteAllText(rulebookFile, fileContent ?? "");
+                ViewBag.FileContent = fileContent;
+                ViewBag.Error = null;
+                ViewBag.Success = "Rules updated successfully.";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.FileContent = fileContent;
+                ViewBag.Error = $"Error: {ex.Message}";
+                ViewBag.Success = null;
+            }
+
+            return View("Index");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

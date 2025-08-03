@@ -8,9 +8,22 @@
             <h2 class="mb-0">Rules</h2>
         </div>
         <div class="card-body">
-            <pre class="bg-light p-3 rounded border">
-@ViewBag.FileContent
-            </pre>
+            @if (!string.IsNullOrEmpty(ViewBag.Error))
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Error
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.Success))
+            {
+                <div class="alert alert-success">
+                    @ViewBag.Sucess
+                </div>
+            }
+            <form method="post" asp-action="EditRuleBook">
+                <textarea name="fileContent" class="form-control mb-3" rows="10">@ViewBag.FileContent</textarea>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
         </div>
     </div>
 </div>
