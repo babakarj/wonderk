@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WonderK.RuleChecker.Models;
-using System.IO;
 
 namespace WonderK.RuleChecker.Controllers
 {
@@ -9,18 +8,18 @@ namespace WonderK.RuleChecker.Controllers
     {
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<HomeController> _logger;
-        private readonly string rulebookFile;
+        private readonly string _rulebookFile;
 
         public HomeController(IWebHostEnvironment env, ILogger<HomeController> logger)
         {
             _env = env;
             _logger = logger;
-            rulebookFile = Path.Combine(_env.ContentRootPath, "rules-book.txt");
+            _rulebookFile = Path.Combine(_env.ContentRootPath, "rules-book.txt");
         }
 
         public IActionResult Index()
         {
-            string filePath = rulebookFile;
+            string filePath = _rulebookFile;
             string fileContent = System.IO.File.Exists(filePath)
                 ? System.IO.File.ReadAllText(filePath)
                 : "File not found.";
@@ -37,7 +36,7 @@ namespace WonderK.RuleChecker.Controllers
             {
                 _ = Rule.ParseRules(fileContent);
 
-                System.IO.File.WriteAllText(rulebookFile, fileContent ?? "");
+                System.IO.File.WriteAllText(_rulebookFile, fileContent ?? "");
                 ViewBag.FileContent = fileContent;
                 ViewBag.Error = null;
                 ViewBag.Success = "Rules updated successfully.";
