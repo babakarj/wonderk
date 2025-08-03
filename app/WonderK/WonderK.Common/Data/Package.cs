@@ -20,24 +20,26 @@
             var package = System.Text.Json.JsonSerializer.Deserialize<Package>(json);
 
             if (package == null)
-                throw new InvalidOperationException("Failed to deserialize JSON to Package");
+                throw new InvalidOperationException($"Failed to deserialize JSON to Package. Json: {json}");
 
-            this.Id = package.Id;
-            this.Departments = package.Departments;
-            this.Metadata = package.Metadata;
-            this.Parcel = package.Parcel;
+            Id = package.Id;
+            Departments = package.Departments;
+            Metadata = package.Metadata;
+            Parcel = package.Parcel;
         }
 
         public Package(Parcel parcel, HashSet<string> departments)
         {
-            this.Parcel = parcel ?? throw new ArgumentNullException(nameof(parcel));
+            Parcel = parcel ?? throw new ArgumentNullException(nameof(parcel));
 
-            if (departments == null || !departments.Any())
+            if (departments == null || departments.Count == 0)
                 throw new ArgumentException("Departments cannot be null or empty", nameof(departments));
+
             foreach (var department in departments)
             {
                 if (string.IsNullOrWhiteSpace(department))
                     throw new ArgumentException("Department name cannot be null or whitespace", nameof(departments));
+
                 Departments.AddLast(department);
             }
         }

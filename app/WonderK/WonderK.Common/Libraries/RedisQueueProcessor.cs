@@ -28,11 +28,11 @@ namespace WonderK.Common.Libraries
                 try
                 {
                     await Db.StreamCreateConsumerGroupAsync(streamKey, groupName, "0-0");
-                    Console.WriteLine("Consumer group created.");
+                    Console.WriteLine($"Consumer group '{groupName}' created.");
                 }
                 catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
                 {
-                    Console.WriteLine("Consumer group already exists.");
+                    Console.WriteLine($"Consumer group '{groupName}' already exists.");
                 }
 
                 while (true)
