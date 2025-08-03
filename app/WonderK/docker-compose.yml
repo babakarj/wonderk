@@ -17,7 +17,7 @@ services:
       redis:
         condition: service_healthy
       wonderk.rulechecker:
-        condition: service_healthy
+        condition: service_started
     build:
       context: .
       dockerfile: WonderK.WebPanel/Dockerfile
@@ -46,34 +46,28 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 20s
     build:
       context: .
-      dockerfile: WonderK.RuleChecker/
+      dockerfile: WonderK.RuleChecker/Dockerfile
 
   # the second instance of the rule checker service with no webpanel
   wonderk.rulechecker2:
-    image: ${DOCKER_REGISTRY-}rulechecker
+    image: ${DOCKER_REGISTRY-}rulechecker2
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
     volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ${APPDATA}2/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}2/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}2/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}2/ASP.NET/Https:/root/.aspnet/https:ro
     deploy:
       replicas: 2
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/healthcheck" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
     build:
       context: .
       dockerfile: WonderK.RuleChecker/Dockerfile
@@ -141,6 +135,6 @@ services:
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
       start_period: 10s
