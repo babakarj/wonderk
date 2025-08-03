@@ -1,10 +1,11 @@
-﻿using WonderK.Common.Data;
+﻿using System.Collections.Immutable;
+using WonderK.Common.Data;
 
 namespace WonderK.RuleChecker
 {
     public static class RuleExtensions
     {
-        public static HashSet<string> GetDepartments(this List<Rule> rules, Parcel item)
+        public static HashSet<string> GetDepartments(this ImmutableList<Rule> rules, Parcel item)
         {
             var departments = new HashSet<string>();
 

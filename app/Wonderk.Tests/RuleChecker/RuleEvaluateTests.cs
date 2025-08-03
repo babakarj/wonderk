@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using WonderK.Common.Data;
 using WonderK.RuleChecker;
 
@@ -69,15 +70,14 @@ namespace Wonderk.Tests.RuleChecker
 
         [Test]
         public void GetDepartments_CorrectDepartmentsReturned()
-        {
-            var rules = new List<Rule>
-            {
-                new("Insurance", "Value", ">", "1000"),
-                new("Mail", "Weight", "<", "0.5"),
-                new("Regular", "Weight", ">=", "0.5"),
-                new("Regular", "Weight", "<", "10"),
-                new("Heavy", "Weight", ">=", "10")
-            };
+        {            
+            var rules = ImmutableList.Create(
+                new Rule("Insurance", "Value", ">", "1000"),
+                new Rule("Mail", "Weight", "<", "0.5"),
+                new Rule("Regular", "Weight", ">=", "0.5"),
+                new Rule("Regular", "Weight", "<", "10"),
+                new Rule("Heavy", "Weight", ">=", "10")
+            );
 
             // Parcel matches Insurance and Mail
             var parcel1 = new Parcel { Value = 1500, Weight = 0.4 };

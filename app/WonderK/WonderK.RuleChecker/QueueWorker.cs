@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Immutable;
+using System.Xml.Serialization;
 using WonderK.Common.Data;
 using WonderK.Common.Libraries;
 
@@ -9,24 +10,57 @@ namespace WonderK.RuleChecker
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<QueueWorker> _logger;
         private readonly IQueueProcessor _queue;
+        private readonly string _rulebookFile;
+        private ImmutableList<Rule> _rules;
+        private FileSystemWatcher? _watcher;
+        private readonly object _rulesLock = new();
 
         public QueueWorker(IWebHostEnvironment env, ILogger<QueueWorker> logger, IQueueProcessor queue)
         {
             _env = env;
             _logger = logger;
             _queue = queue;
+            _rulebookFile = Path.Combine(_env.ContentRootPath, "rules-book.txt");
+            _rules = GetRules();
+            SetupFileWatcher();
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        private void SetupFileWatcher()
         {
-            Console.WriteLine("Hello, from WonderK.RuleChecker!");
+            string filePath = _rulebookFile;
+            string directory = Path.GetDirectoryName(filePath)!;
+            string fileName = Path.GetFileName(filePath);
 
+            _watcher = new FileSystemWatcher(directory, fileName)
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size
+            };
+            _watcher.Changed += (s, e) => ReloadRules();
+            _watcher.EnableRaisingEvents = true;
+        }
+
+        private void ReloadRules()
+        {
+            lock (_rulesLock)
+            {
+                _rules = GetRules();
+                _logger.LogInformation("Rules reloaded from rules-book.txt.");
+            }
+        }
+
+        private ImmutableList<Rule> GetRules()
+        {
             string filePath = Path.Combine(_env.ContentRootPath, "rules-book.txt");
             string ruleText = File.Exists(filePath)
                 ? File.ReadAllText(filePath)
                 : "File not found.";
 
-            List<Rule> rules = Rule.ParseRules(ruleText);
+            return Rule.ParseRules(ruleText).ToImmutableList();
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            Console.WriteLine("Hello, from WonderK.RuleChecker!");            
 
             string streamKey = "parcel-stream";
             string groupName = "rule-checker-group";
@@ -45,7 +79,7 @@ namespace WonderK.RuleChecker
                 Parcel parcel = (Parcel)serializer.Deserialize(reader);
                 Console.WriteLine($"Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
 
-                var departments = rules.GetDepartments(parcel);
+                var departments = _rules.GetDepartments(parcel);
                 Console.WriteLine("Matching departments: " + string.Join(", ", departments));
 
                 await Send(parcel, departments);
