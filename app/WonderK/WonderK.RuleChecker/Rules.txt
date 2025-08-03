@@ -1,0 +1,5 @@
+﻿Insurance: Value>1000
+Mail: Weight<0.5
+Regular: Weight>=0.5
+Regular: Weight<10
+Heavy: Weight>=10
