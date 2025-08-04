@@ -8,7 +8,8 @@ namespace WonderK.Common.Libraries
 
         public RedisQueueProcessor()
         {
-            var redis = ConnectionMultiplexer.Connect("redis:6379");
+            var port = Environment.GetEnvironmentVariable("REDIS_PORT") ?? "6379";
+            var redis = ConnectionMultiplexer.Connect("redis:" + port);
             Db = redis.GetDatabase();
         }
 
@@ -22,12 +23,14 @@ namespace WonderK.Common.Libraries
         {
             Console.WriteLine($"Listening to stream '{streamKey}' by '{groupName}|{consumerName}'...");
 
+            long ten_seconds = (long)TimeSpan.FromSeconds(10).TotalMilliseconds;
+
             while (true)
             {
                 // Try to create the group (ignore if exists)
                 try
                 {
-                    await Db.StreamCreateConsumerGroupAsync(streamKey, groupName, "0-0");
+                    await Db.StreamCreateConsumerGroupAsync(streamKey, groupName, "$" /* start at new messages */);
                     Console.WriteLine($"Consumer group '{groupName}' created.");
                 }
                 catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
@@ -43,7 +46,7 @@ namespace WonderK.Common.Libraries
                     {
                         // Auto-claim pending messages older than 10 seconds
                         var result = await Db.StreamAutoClaimAsync(streamKey, groupName, consumerName,
-                            minIdleTimeInMs: TimeSpan.FromSeconds(10).Milliseconds, // Idle time threshold for claiming old messages
+                            minIdleTimeInMs: ten_seconds, // Idle time threshold for claiming old messages
                             startAtId: "0-0",
                             count: 1);
                         entries = result.ClaimedEntries;
@@ -51,15 +54,16 @@ namespace WonderK.Common.Libraries
 
                     foreach (var entry in entries)
                     {
-                        Console.WriteLine($"Claimed message {entry.Id}, data: {entry["data"]}");
+                        Console.WriteLine($"Claimed message {entry.Id} by consumer {groupName}-{consumerName}, data: {entry["data"]}");
 
+                        //TODO: Handle exceptions in action
                         action(entry["data"]);
 
                         // Acknowledge message
                         await Db.StreamAcknowledgeAsync(streamKey, groupName, entry.Id);
                     }
 
-                    await Task.Delay(1000); // Polling interval
+                    await Task.Delay(500); // Polling interval
                 }
             }
         }
