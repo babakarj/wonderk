@@ -2,6 +2,7 @@ services:
   wonderk.webpanel:
     image: ${DOCKER_REGISTRY-}wonderkwebpanel
     environment:
+      - REDIS_PORT=6379
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
@@ -25,6 +26,7 @@ services:
   wonderk.rulechecker:
     image: ${DOCKER_REGISTRY-}rulechecker
     environment:
+      - REDIS_PORT=6379
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
@@ -55,6 +57,7 @@ services:
   wonderk.rulechecker2:
     image: ${DOCKER_REGISTRY-}rulechecker2
     environment:
+      - REDIS_PORT=6379
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
@@ -74,6 +77,8 @@ services:
 
   wonderk.departmentheavy:
     image: ${DOCKER_REGISTRY-}departmentheavy
+    environment:
+      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
@@ -88,6 +93,8 @@ services:
 
   wonderk.departmentinsurance:
     image: ${DOCKER_REGISTRY-}departmentinsurance
+    environment:
+      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
@@ -102,6 +109,8 @@ services:
 
   wonderk.departmentmail:
     image: ${DOCKER_REGISTRY-}departmentmail
+    environment:
+      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
@@ -116,6 +125,8 @@ services:
 
   wonderk.departmentregular:
     image: ${DOCKER_REGISTRY-}departmentregular
+    environment:
+      - REDIS_PORT=6379
     depends_on:
       redis:
         condition: service_healthy
