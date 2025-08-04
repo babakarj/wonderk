@@ -3,13 +3,17 @@ using WonderK.Common.Libraries;
 
 namespace WonderK.Department.Heavy
 {
-    public class HeavyConsumer(IQueueProcessor queue) : Consumer(queue)
+    public class HeavyConsumer(IQueueProcessor queue, IProcessLogger processLogger) : Consumer(queue, processLogger)
     {
-        public override void Process(Package package)
+        public override async Task Process(Package package)
         {
-            base.Process(package);
+            await base.Process(package);
 
-            Console.WriteLine($"Heavy consumed package: {package}");
+            string payload = package.ToString();
+
+            Console.WriteLine($"Heavy consumed package: {payload}");
+
+            await ProcessLogger.LogAsync("Heavy", payload);
         }
     }
 }

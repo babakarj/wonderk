@@ -3,13 +3,17 @@ using WonderK.Common.Libraries;
 
 namespace WonderK.Department.Mail
 {
-    public class MailConsumer(IQueueProcessor queue) : Consumer(queue)
+    public class MailConsumer(IQueueProcessor queue, IProcessLogger processLogger) : Consumer(queue, processLogger)
     {
-        public override void Process(Package package)
+        public override async Task Process(Package package)
         {
-            base.Process(package);
+            await base.Process(package);
 
-            Console.WriteLine($"Mail consumed package: {package}");
+            string payload = package.ToString();
+
+            Console.WriteLine($"Mail consumed package: {payload}");
+
+            await ProcessLogger.LogAsync("Mail", payload);
         }
     }
 }

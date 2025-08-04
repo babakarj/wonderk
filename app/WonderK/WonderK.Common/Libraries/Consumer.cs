@@ -2,9 +2,10 @@
 
 namespace WonderK.Common.Libraries
 {
-    public abstract class Consumer(IQueueProcessor queue)
+    public abstract class Consumer(IQueueProcessor queue, IProcessLogger processLogger)
     {
         public IQueueProcessor Queue { get; } = queue;
+        public IProcessLogger ProcessLogger { get; } = processLogger;
 
         public async Task Listen(string streamKey, string groupName, string consumerName)
         {
@@ -18,12 +19,14 @@ namespace WonderK.Common.Libraries
             });
         }
 
-        public virtual void Process(Package package)
+        public virtual Task Process(Package package)
         {
             if (package.Departments.Count > 0)
             {
                 package.Departments.RemoveFirst();
             }
+
+            return Task.CompletedTask;
         }
 
         public async Task Forward(Package package)

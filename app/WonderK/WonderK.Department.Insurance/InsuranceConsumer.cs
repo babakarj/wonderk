@@ -3,15 +3,19 @@ using WonderK.Common.Libraries;
 
 namespace WonderK.Department.Insurance
 {
-    public class InsuranceConsumer(IQueueProcessor queue) : Consumer(queue)
+    public class InsuranceConsumer(IQueueProcessor queue, IProcessLogger processLogger) : Consumer(queue, processLogger)
     {
-        public override void Process(Package package)
+        public override async Task Process(Package package)
         {
-            base.Process(package);
+            await base.Process(package);
 
             package.Metadata.AddLast($"Signed by the insurance department at {DateTime.UtcNow}");
 
-            Console.WriteLine($"Insurance consumed package: {package}");
+            string payload = package.ToString();
+
+            Console.WriteLine($"Insurance consumed package: {payload}");
+
+            await ProcessLogger.LogAsync("Insurance", payload);
         }
     }
 }

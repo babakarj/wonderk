@@ -10,16 +10,27 @@ namespace WonderK.RuleChecker
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<QueueWorker> _logger;
         private readonly IQueueProcessor _queue;
+        private readonly IProcessLogger _processLogger;
         private readonly string _rulebookFile;
         private ImmutableList<Rule> _rules;
         private FileSystemWatcher? _watcher;
 
-        public QueueWorker(IWebHostEnvironment env, ILogger<QueueWorker> logger, IQueueProcessor queue)
+        private readonly string _streamKey = "parcel-stream";
+        private readonly string _groupName = "rule-checker-group";
+        private readonly string _consumerName = "rc-" + Guid.NewGuid().ToString();
+
+        public QueueWorker(IWebHostEnvironment env, ILogger<QueueWorker> logger, IQueueProcessor queue, IProcessLogger processLogger)
         {
             _env = env;
             _logger = logger;
             _queue = queue;
+            _processLogger = processLogger;
             _rulebookFile = Path.Combine(_env.ContentRootPath, "rules-book.txt");
+
+            _streamKey = "parcel-stream";
+            _groupName = "rule-checker-group";
+            _consumerName = "rc-" + Guid.NewGuid().ToString();
+
             _rules = GetRules();
             SetupFileWatcher();
         }
@@ -58,11 +69,7 @@ namespace WonderK.RuleChecker
         {
             Console.WriteLine("Hello, from WonderK.RuleChecker!");
 
-            string streamKey = "parcel-stream";
-            string groupName = "rule-checker-group";
-            string consumerName = "rc-" + Guid.NewGuid().ToString();
-
-            await _queue.Consume(streamKey, groupName, consumerName, async (data) =>
+            await _queue.Consume(_streamKey, _groupName, _consumerName, async (data) =>
             {
                 if (stoppingToken.IsCancellationRequested)
                 {
@@ -73,7 +80,9 @@ namespace WonderK.RuleChecker
                 XmlSerializer serializer = new(typeof(Parcel));
                 using StringReader reader = new(data);
                 Parcel parcel = (Parcel)serializer.Deserialize(reader);
-                Console.WriteLine($"Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
+                Console.WriteLine($"{_consumerName} ** Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
+
+                await _processLogger.LogAsync("RuleChecker", $"{_consumerName} ** Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
 
                 var departments = Volatile.Read(ref _rules).GetDepartments(parcel);
                 Console.WriteLine("Matching departments: " + string.Join(", ", departments));
@@ -88,7 +97,11 @@ namespace WonderK.RuleChecker
 
             string streamKey = departments.First() + "-stream";
 
-            string messageId = await _queue.Produce(streamKey, package.ToString());
+            string payload = package.ToString();
+
+            string messageId = await _queue.Produce(streamKey, payload);
+
+            await _processLogger.LogAsync("RuleChecker", payload);
 
             Console.WriteLine($"Message added to stream with ID: {messageId}");
         }

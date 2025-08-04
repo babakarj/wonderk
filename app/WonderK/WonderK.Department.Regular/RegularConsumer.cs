@@ -3,13 +3,17 @@ using WonderK.Common.Libraries;
 
 namespace WonderK.Department.Regular
 {
-    public class RegularConsumer(IQueueProcessor queue) : Consumer(queue)
+    public class RegularConsumer(IQueueProcessor queue, IProcessLogger processLogger) : Consumer(queue, processLogger)
     {
-        public override void Process(Package package)
+        public override async Task Process(Package package)
         {
-            base.Process(package);
+            await base.Process(package);
 
-            Console.WriteLine($"Regular consumed package: {package}");
+            string payload = package.ToString();
+
+            Console.WriteLine($"Regular consumed package: {payload}");
+
+            await ProcessLogger.LogAsync("Regular", payload);
         }
     }
 }

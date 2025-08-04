@@ -1,0 +1,10 @@
+@model IEnumerable<string>
+
+<div class="card">
+    <ul class="list-group list-group-flush">
+        @foreach (var log in Model)
+        {
+            <li class="list-group-item">@log</li>
+        }
+    </ul>
+</div>

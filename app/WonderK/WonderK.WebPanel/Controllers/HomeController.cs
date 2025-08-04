@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Xml;
 using WonderK.Common.Libraries;
 using WonderK.WebPanel.Models;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace WonderK.WebPanel.Controllers
 {
@@ -12,13 +13,15 @@ namespace WonderK.WebPanel.Controllers
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<HomeController> _logger;
         private readonly IQueueProcessor _queue;
+        private readonly IProcessLogger _processLogger;
 
-        public HomeController(IWebHostEnvironment env, ILogger<HomeController> logger, IQueueProcessor queue)
+        public HomeController(IWebHostEnvironment env, ILogger<HomeController> logger, IQueueProcessor queue, IProcessLogger processLogger)
         {
             _env = env;
             _logger = logger;
             _queue = queue;
-        }
+            _processLogger = processLogger;
+        }   
 
         public IActionResult Index()
         {
@@ -163,9 +166,17 @@ namespace WonderK.WebPanel.Controllers
             });
         }
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> ProcessLog(int page = 1, string filter = "")
         {
-            return View();
+            var model = await _processLogger.GetAsync(page, 100, filter);
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<PartialViewResult> ProcessLogList(int page = 1, string filter = "")
+        {
+            var model = await _processLogger.GetAsync(page, 100, filter);
+            return PartialView(model);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
