@@ -13,7 +13,6 @@ namespace WonderK.RuleChecker
         private readonly string _rulebookFile;
         private ImmutableList<Rule> _rules;
         private FileSystemWatcher? _watcher;
-        private readonly object _rulesLock = new();
 
         public QueueWorker(IWebHostEnvironment env, ILogger<QueueWorker> logger, IQueueProcessor queue)
         {
@@ -41,11 +40,8 @@ namespace WonderK.RuleChecker
 
         private void ReloadRules()
         {
-            lock (_rulesLock)
-            {
-                _rules = GetRules();
-                _logger.LogInformation("Rules reloaded from rules-book.txt.");
-            }
+            Interlocked.Exchange(ref _rules, GetRules());
+            _logger.LogInformation("Rules reloaded from rules-book.txt.");
         }
 
         private ImmutableList<Rule> GetRules()
@@ -60,7 +56,7 @@ namespace WonderK.RuleChecker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("Hello, from WonderK.RuleChecker!");            
+            Console.WriteLine("Hello, from WonderK.RuleChecker!");
 
             string streamKey = "parcel-stream";
             string groupName = "rule-checker-group";
@@ -79,7 +75,7 @@ namespace WonderK.RuleChecker
                 Parcel parcel = (Parcel)serializer.Deserialize(reader);
                 Console.WriteLine($"Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
 
-                var departments = _rules.GetDepartments(parcel);
+                var departments = Volatile.Read(ref _rules).GetDepartments(parcel);
                 Console.WriteLine("Matching departments: " + string.Join(", ", departments));
 
                 await Send(parcel, departments);
