@@ -82,8 +82,6 @@ namespace WonderK.RuleChecker
                 Parcel parcel = (Parcel)serializer.Deserialize(reader);
                 Console.WriteLine($"{_consumerName} ** Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
 
-                await _processLogger.LogAsync("RuleChecker", $"{_consumerName} ** Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
-
                 var departments = Volatile.Read(ref _rules).GetDepartments(parcel);
                 Console.WriteLine("Matching departments: " + string.Join(", ", departments));
 
