@@ -22,7 +22,7 @@
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="autoRefreshChk" />
                 <label class="form-check-label" for="autoRefreshChk">
-                    Auto-refresh every 5s
+                    Auto-refresh every 2s
                 </label>
             </div>
         </div>
@@ -36,7 +36,7 @@
 
     <nav aria-label="Process log pagination">
         <ul class="pagination justify-content-center" id="pagination">
-            <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+            <li class="page-item disabled">
                 <button class="page-link" id="prevPageBtn" type="button">Prev</button>
             </li>
             <li class="page-item disabled">
@@ -57,6 +57,8 @@
         let autoRefreshTimer = null;
 
         function loadLogs(page, filter) {
+            console.log(`Loading logs for page ${page} with filter "${filter}"`);
+
             $.get('@Url.Action("ProcessLogList", "Home")', { page: page, filter: filter }, function (data) {
                 $('#logList').html(data);
             });
@@ -75,12 +77,18 @@
         $('#prevPageBtn').on('click', function () {
             if (currentPage > 1) {
                 currentPage--;
+                if (currentPage === 1) {
+                    $('#prevPageBtn').parent().addClass('disabled');
+                }
                 loadLogs(currentPage, currentFilter);
             }
         });
 
         $('#nextPageBtn').on('click', function () {
             currentPage++;
+            if(currentPage > 1) {
+                $('#prevPageBtn').parent().removeClass('disabled');
+            }
             loadLogs(currentPage, currentFilter);
         });
 
@@ -89,7 +97,7 @@
             if (autoRefresh) {
                 autoRefreshTimer = setInterval(function () {
                     loadLogs(currentPage, currentFilter);
-                }, 5000);
+                }, 2000);
             } else {
                 clearInterval(autoRefreshTimer);
             }

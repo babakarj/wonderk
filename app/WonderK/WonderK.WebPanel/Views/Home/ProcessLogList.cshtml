@@ -1,10 +1,125 @@
 @model IEnumerable<string>
+@using System.Text.Json
+@using WonderK.Common.Data
+@functions {
+    class LogEntry
+    {
+        public DateTime Timestamp { get; set; }
+        public string Source { get; set; }
+        public Package Package { get; set; }
+    }
+
+    LogEntry ParseLog(string log)
+    {
+        // Example: [{Guid} {timestamp:O}] {source} - {message}
+        var startBracket = log.IndexOf('[');
+        var endBracket = log.IndexOf(']');
+        if (startBracket == -1 || endBracket == -1) return null;
+
+        var header = log.Substring(startBracket + 1, endBracket - startBracket - 1);
+        var parts = header.Split(' ');
+        if (parts.Length < 2) return null;
+
+        if (!DateTime.TryParse(parts[1], out var timestamp))
+            return null;
+
+        var afterBracket = log.Substring(endBracket + 2); // skip "] "
+        var dashIdx = afterBracket.IndexOf(" - ");
+        if (dashIdx == -1) return null;
+
+        var source = afterBracket.Substring(0, dashIdx);
+        var message = afterBracket.Substring(dashIdx + 3);
+
+        try
+        {
+            var msgJson = JsonSerializer.Deserialize<Package>(message);
+            return new LogEntry { Timestamp = timestamp, Source = source, Package = msgJson };
+        }
+        catch
+        {
+            return new LogEntry { Timestamp = timestamp, Source = source, Package = default };
+        }
+    }
+}
 
 <div class="card">
     <ul class="list-group list-group-flush">
         @foreach (var log in Model)
         {
-            <li class="list-group-item">@log</li>
+            var entry = ParseLog(log);
+            if (entry == null)
+            {
+                <li class="list-group-item text-danger">@log</li>
+            }
+            else
+            {
+                <li class="list-group-item">
+                    <div class="container my-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                Id: @entry.Package.Id
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                @entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff")
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>From: @entry.Source</td>
+                                        </tr>
+                                        @if (entry.Package.Departments != null && entry.Package.Departments.Count > 0)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    Departments to go: @string.Join(", ", entry.Package.Departments)
+                                                </td>
+                                            </tr>
+                                        }
+                                        @if (entry.Package.Metadata != null && entry.Package.Metadata.Count > 0)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @string.Join("<br />", entry.Package.Metadata)
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Recipient</th>
+                                            <td>@entry.Package.Parcel.Receipient.Name</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Address</th>
+                                            <td>
+                                                @entry.Package.Parcel.Receipient.Address.Street @entry.Package.Parcel.Receipient.Address.HouseNumber<br />
+                                                @entry.Package.Parcel.Receipient.Address.PostalCode @entry.Package.Parcel.Receipient.Address.City
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Weight (kg)</th>
+                                            <td>@entry.Package.Parcel.Weight</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Value (&euro;)</th>
+                                            <td>@entry.Package.Parcel.Value</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            }
         }
     </ul>
 </div>
