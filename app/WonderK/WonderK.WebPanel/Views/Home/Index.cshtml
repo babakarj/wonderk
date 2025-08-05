@@ -2,14 +2,16 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="container py-5">
+<div class="container mt-4">
     <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Upload</h2>
+        </div>
         <div class="card-body">
-            <h2 class="card-title mb-4">Chunked XML Upload</h2>
 
             <div class="mb-3">
-                <label for="xmlFile" class="form-label">Select XML File</label>
-                <input class="form-control" type="file" id="xmlFile" />
+                <label for="xmlFile" class="form-label">Select an XML file:</label>
+                <input class="form-control" type="file" id="xmlFile" accept=".xml" />
             </div>
 
             <button id="btnStart" class="btn btn-primary">Start Upload &amp; Process</button>
@@ -55,7 +57,7 @@
             if (!fileInput.files.length) {
               const toast = new bootstrap.Toast(
                 Object.assign(document.createElement('div'), {
-                  className: 'toast align-items-center text-bg-danger border-0 position-fixed bottom-0 end-0 m-3',
+                  className: 'toast align-items-center text-white bg-danger border-0 position-fixed top-0 start-50 translate-middle-x m-3',
                   innerHTML: `
                     <div class="d-flex">
                       <div class="toast-body">
@@ -87,6 +89,14 @@
             const barUpload = document.getElementById("progressUpload");
             containerUpload.style.display = "block";
 
+            const container = document.getElementById("progressContainer");
+            const bar = document.getElementById("progressbar");
+
+            barUpload.style.width = "0%";
+            barUpload.textContent = "0%";
+            bar.style.width = "0%";
+            bar.textContent = "0%";
+
             // upload chunks
             const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
             for (let idx = 0; idx < totalChunks; idx++) {
@@ -114,8 +124,6 @@
             }
 
             // show the progress UI
-            const container = document.getElementById("progressContainer");
-            const bar = document.getElementById("progress");
             container.style.display = "block";
 
             // poll for processing progress
