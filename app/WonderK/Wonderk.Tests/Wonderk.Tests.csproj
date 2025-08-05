@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\WonderK\WonderK.RuleChecker\WonderK.RuleChecker.csproj" />
+    <ProjectReference Include="..\WonderK.RuleChecker\WonderK.RuleChecker.csproj" />
   </ItemGroup>
 
   <ItemGroup>
