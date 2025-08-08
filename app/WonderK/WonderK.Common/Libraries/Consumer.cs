@@ -13,7 +13,7 @@ namespace WonderK.Common.Libraries
             {
                 Package package = new(data);
 
-                Process(package);
+                await Process(package);
 
                 await Forward(package);
             });
@@ -31,7 +31,7 @@ namespace WonderK.Common.Libraries
 
         public async Task Forward(Package package)
         {
-            if (package.Departments.Count > 0)
+            if (package.Departments.Count > 0 && package.Departments.First != null)
             {
                 string nextConsumer = package.Departments.First.Value;
 
