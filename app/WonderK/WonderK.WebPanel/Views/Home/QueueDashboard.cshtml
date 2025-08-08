@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Queue Dashboard";
+}
+
+<h2>Queue Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                Parcels to process by departments
+            </div>
+            <div class="card-body">
+                <div id="parcel-stream-status"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                Insurance Department
+            </div>
+            <div class="card-body">
+                <div id="insurance-stream-status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                Mail Department
+            </div>
+            <div class="card-body">
+                <div id="mail-stream-status"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                Regular Department
+            </div>
+            <div class="card-body">
+                <div id="regular-stream-status"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                Heavy Department
+            </div>
+            <div class="card-body">
+                <div id="heavy-stream-status"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateQueueStatus(streamKey, containerId) {
+            $.get('/Home/QueueStatus', { streamKey: streamKey }, function (data) {
+                $('#' + containerId).html(data);
+            });
+        }
+
+        function refreshAllQueues() {
+            updateQueueStatus('parcel-stream', 'parcel-stream-status');
+            updateQueueStatus('Insurance-stream', 'insurance-stream-status');
+            updateQueueStatus('Mail-stream', 'mail-stream-status');
+            updateQueueStatus('Regular-stream', 'regular-stream-status');
+            updateQueueStatus('Heavy-stream', 'heavy-stream-status');
+        }
+
+        $(document).ready(function () {
+            refreshAllQueues();
+            setInterval(refreshAllQueues, 2000);
+        });
+    </script>
+}

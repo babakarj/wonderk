@@ -4,5 +4,6 @@
     {
         Task<string> Produce(string streamKey, string data);
         Task Consume(string streamKey, string groupName, string consumerName, Action<string> action);
+        Task<List<(string Key, string Value)>> Status(string streamKey);
     }
 }

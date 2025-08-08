@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis;
 using System.Diagnostics;
 using System.Xml;
 using WonderK.Common.Libraries;
 using WonderK.WebPanel.Models;
-using static System.Reflection.Metadata.BlobBuilder;
 
 namespace WonderK.WebPanel.Controllers
 {
@@ -21,7 +19,7 @@ namespace WonderK.WebPanel.Controllers
             _logger = logger;
             _queue = queue;
             _processLogger = processLogger;
-        }   
+        }
 
         public IActionResult Index()
         {
@@ -183,6 +181,18 @@ namespace WonderK.WebPanel.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult QueueDashboard()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<PartialViewResult> QueueStatus(string streamKey)
+        {
+            var model = await _queue.Status(streamKey);
+            return PartialView(model);
         }
     }
 }

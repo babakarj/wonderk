@@ -1,0 +1,13 @@
+﻿@model List<(string Key, string Value)>
+
+<table class="table table-sm table-striped mb-0">
+    <tbody>
+        @foreach (var (key, value) in Model)
+        {
+            <tr>
+                <th>@key</th>
+                <td>@value</td>
+            </tr>
+        }
+    </tbody>
+</table>

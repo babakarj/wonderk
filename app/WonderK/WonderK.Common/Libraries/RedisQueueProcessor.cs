@@ -67,5 +67,29 @@ namespace WonderK.Common.Libraries
                 }
             }
         }
+
+        public async Task<List<(string Key, string Value)>> Status(string streamKey)
+        {
+            List<(string Key, string Value)> result = [];
+
+            string[] validKeys = ["consumers", "pending", "entries-read", "lag"];
+
+            var data = await Db.ExecuteAsync("XINFO", "GROUPS", streamKey);
+
+            foreach (var groupInfo in (RedisResult[])data)
+            {
+                var groupProps = (RedisResult[])groupInfo;
+                for (int i = 0; i < groupProps.Length - 1; i += 2)
+                {
+                    string key = groupProps[i].ToString();
+                    if (validKeys.Contains(key))
+                    {
+                        result.Add((key.ToUpper(), groupProps[i + 1].ToString()));
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }
