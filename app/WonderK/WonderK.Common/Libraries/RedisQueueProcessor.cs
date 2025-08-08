@@ -4,6 +4,8 @@ namespace WonderK.Common.Libraries
 {
     public class RedisQueueProcessor : IQueueProcessor
     {
+        private const string DataFieldName = "data";
+
         private IDatabase Db { get; }
 
         public RedisQueueProcessor()
@@ -15,8 +17,8 @@ namespace WonderK.Common.Libraries
 
         public async Task<string> Produce(string streamKey, string data)
         {
-            string messageId = await Db.StreamAddAsync(streamKey, [new NameValueEntry("data", data)]);
-            return messageId;
+            RedisValue messageId = await Db.StreamAddAsync(streamKey, [new NameValueEntry(DataFieldName, data)]);
+            return messageId.ToString();
         }
 
         public async Task Consume(string streamKey, string groupName, string consumerName, Action<string> action)
@@ -54,13 +56,29 @@ namespace WonderK.Common.Libraries
 
                     foreach (var entry in entries)
                     {
-                        Console.WriteLine($"Claimed message {entry.Id} by consumer {groupName}-{consumerName}, data: {entry["data"]}");
+                        string? data = entry.Values.FirstOrDefault(v => v.Name == DataFieldName).Value;
 
-                        //TODO: Handle exceptions in action
-                        action(entry["data"]);
+                        if (data == null)
+                        {
+                            Console.WriteLine($"No '{DataFieldName}' field found in message {entry.Id}. Skipping.");
 
-                        // Acknowledge message
-                        await Db.StreamAcknowledgeAsync(streamKey, groupName, entry.Id);
+                            await Db.StreamAcknowledgeAsync(streamKey, groupName, entry.Id);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Claimed message {entry.Id} by consumer {groupName}-{consumerName}, data: {data}");
+
+                            try
+                            {
+                                action(data);
+
+                                await Db.StreamAcknowledgeAsync(streamKey, groupName, entry.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error processing message {entry.Id}: {ex.Message}");
+                            }
+                        }
                     }
 
                     await Task.Delay(500); // Polling interval
