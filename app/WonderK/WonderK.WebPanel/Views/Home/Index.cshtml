@@ -53,6 +53,9 @@
           const CHUNK_SIZE = 1024 * 1024; // 1 MB
 
           document.getElementById("btnStart").onclick = async () => {
+            const btnStart = document.getElementById("btnStart");
+            btnStart.disabled = true; // Disable button on click
+
             const fileInput = document.getElementById("xmlFile");
             if (!fileInput.files.length) {
               const toast = new bootstrap.Toast(
@@ -70,6 +73,9 @@
               );
               document.body.appendChild(toast._element);
               toast.show();
+
+              btnStart.disabled = false; // Re-enable if no file selected
+
               return;
             }
             const file = fileInput.files[0];
@@ -78,6 +84,9 @@
             const createResp = await fetch("@Url.Action("Upload")", { method: "POST", body: new FormData() });
             if (!createResp.ok) {
               alert("Failed to start job.");
+
+              btnStart.disabled = false; // Re-enable if job creation fails
+
               return;
             }
             const { jobId } = await createResp.json();
@@ -114,6 +123,9 @@
               });
               if (!resp.ok) {
                 alert("Chunk upload failed at index " + idx);
+
+                btnStart.disabled = false; // Re-enable if chunk upload fails
+
                 return;
               }
 
@@ -134,6 +146,8 @@
                 bar.style.width = "100%";
                 bar.textContent = "100%";
                 bar.classList.remove("progress-bar-animated");
+
+                btnStart.disabled = false; // Re-enable when upload and processing complete
                 return;
               }
               const { percent } = await pr.json();
