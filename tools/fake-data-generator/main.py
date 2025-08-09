@@ -35,8 +35,8 @@ def main():
         ET.SubElement(addr, "PostalCode").text = address.postal_code()
         ET.SubElement(addr, "City").text = address.city()
 
-        ET.SubElement(parcel, "Weight").text = f"{random.uniform(0.01, 5.00):.2f}"
-        ET.SubElement(parcel, "Value").text = f"{random.uniform(10.0, 50000.0):.1f}"
+        ET.SubElement(parcel, "Weight").text = f"{random.uniform(0.01, 100.00):.2f}"
+        ET.SubElement(parcel, "Value").text = f"{random.uniform(1.0, 50000.0):.1f}"
 
     rough_string = ET.tostring(container, encoding="utf-8")
     reparsed = minidom.parseString(rough_string)
