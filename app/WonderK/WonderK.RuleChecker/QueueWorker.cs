@@ -52,6 +52,7 @@ namespace WonderK.RuleChecker
         private void ReloadRules()
         {
             Interlocked.Exchange(ref _rules, GetRules());
+
             _logger.LogInformation("Rules reloaded from rules-book.txt.");
         }
 
@@ -67,25 +68,41 @@ namespace WonderK.RuleChecker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Console.WriteLine("Hello, from WonderK.RuleChecker!");
+            _logger.LogInformation("Hello, from WonderK.RuleChecker!");
 
             await _queue.Consume(_streamKey, _groupName, _consumerName, async (data) =>
             {
                 if (stoppingToken.IsCancellationRequested)
                 {
-                    Console.WriteLine("Cancellation requested, stopping processing.");
+                    _logger.LogDebug("Cancellation requested, stopping processing.");
                     return;
                 }
 
-                XmlSerializer serializer = new(typeof(Parcel));
-                using StringReader reader = new(data);
-                Parcel parcel = (Parcel)serializer.Deserialize(reader);
-                Console.WriteLine($"{_consumerName} ** Recipient: {parcel.Receipient.Name}, Weight: {parcel.Weight}, Value: {parcel.Value}");
+                try
+                {
+                    XmlSerializer serializer = new(typeof(Parcel));
 
-                var departments = Volatile.Read(ref _rules).GetDepartments(parcel);
-                Console.WriteLine("Matching departments: " + string.Join(", ", departments));
+                    using StringReader reader = new(data);
+                    Parcel? parcel = serializer.Deserialize(reader) as Parcel;
 
-                await Send(parcel, departments);
+                    if (parcel == null)
+                    {
+                        _logger.LogWarning("Failed to deserialize Parcel from data: {data}", data);
+                        return;
+                    }
+
+                    _logger.LogDebug($"{_consumerName} ** Recipient: {parcel.Receipient?.Name ?? "Unknown"}, Weight: {parcel.Weight}, Value: {parcel.Value}");
+
+                    var departments = Volatile.Read(ref _rules).GetDepartments(parcel);
+
+                    _logger.LogDebug("Matching departments: " + string.Join(", ", departments));
+
+                    await Send(parcel, departments);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing parcel data.");
+                }
             });
         }
 
@@ -101,7 +118,7 @@ namespace WonderK.RuleChecker
 
             await _processLogger.LogAsync("RuleChecker", payload);
 
-            Console.WriteLine($"Message added to stream with ID: {messageId}");
+            _logger.LogDebug($"Message added to stream with ID: {messageId}");
         }
     }
 }

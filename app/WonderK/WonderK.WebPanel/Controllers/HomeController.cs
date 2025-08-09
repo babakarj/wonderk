@@ -28,7 +28,7 @@ namespace WonderK.WebPanel.Controllers
 
         /// <summary>
         /// Handles the initial upload request and creates a new job for chunked file upload.
-        /// </summary>        
+        /// </summary>
         [HttpPost]
         public IActionResult Upload(IFormFile _)
         {
@@ -140,7 +140,7 @@ namespace WonderK.WebPanel.Controllers
 
                 string messageId = await _queue.Produce(streamKey, parcelXml);
 
-                Console.WriteLine($"Message added to stream with ID: {messageId}");
+                _logger.LogDebug("Message added to stream with ID: {messageId}", messageId);
             }
             catch (Exception ex)
             {
