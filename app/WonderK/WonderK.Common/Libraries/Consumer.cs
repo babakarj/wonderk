@@ -9,14 +9,16 @@ namespace WonderK.Common.Libraries
 
         public async Task Listen(string streamKey, string groupName, string consumerName)
         {
-            await Queue.Consume(streamKey, groupName, consumerName, async (data) =>
-            {
-                Package package = new(data);
+            await Queue.Consume(
+                streamKey, groupName, consumerName,
+                async (data) =>
+                {
+                    Package package = new(data);
 
-                await Process(package);
+                    await Process(package);
 
-                await Forward(package);
-            });
+                    await Forward(package);
+                });
         }
 
         public virtual Task Process(Package package)
@@ -29,7 +31,7 @@ namespace WonderK.Common.Libraries
             return Task.CompletedTask;
         }
 
-        public async Task Forward(Package package)
+        public virtual async Task Forward(Package package)
         {
             if (package.Departments.Count > 0 && package.Departments.First != null)
             {
@@ -39,7 +41,7 @@ namespace WonderK.Common.Libraries
 
                 await Queue.Produce(streamKey, package.ToString());
 
-                Console.WriteLine($"Forwarding package to {nextConsumer}");
+                Console.WriteLine($"Forwarding package to {nextConsumer}.");
             }
             else
             {
