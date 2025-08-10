@@ -67,7 +67,7 @@ services:
       - ${APPDATA}2/ASP.NET/Https:/home/app/.aspnet/https:ro
       - ${APPDATA}2/ASP.NET/Https:/root/.aspnet/https:ro
     deploy:
-      replicas: 2
+      replicas: 4
     depends_on:
       redis:
         condition: service_healthy
@@ -79,6 +79,8 @@ services:
     image: ${DOCKER_REGISTRY-}departmentheavy
     environment:
       - REDIS_PORT=6379
+    deploy:
+      replicas: 3
     depends_on:
       redis:
         condition: service_healthy
@@ -95,6 +97,8 @@ services:
     image: ${DOCKER_REGISTRY-}departmentinsurance
     environment:
       - REDIS_PORT=6379
+    deploy:
+      replicas: 2
     depends_on:
       redis:
         condition: service_healthy
@@ -111,6 +115,8 @@ services:
     image: ${DOCKER_REGISTRY-}departmentmail
     environment:
       - REDIS_PORT=6379
+    deploy:
+      replicas: 2
     depends_on:
       redis:
         condition: service_healthy
@@ -127,6 +133,8 @@ services:
     image: ${DOCKER_REGISTRY-}departmentregular
     environment:
       - REDIS_PORT=6379
+    deploy:
+      replicas: 2
     depends_on:
       redis:
         condition: service_healthy

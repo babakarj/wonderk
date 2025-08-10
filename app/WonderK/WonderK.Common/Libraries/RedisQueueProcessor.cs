@@ -42,7 +42,7 @@ namespace WonderK.Common.Libraries
 
                 while (true)
                 {
-                    var entries = await Db.StreamReadGroupAsync(streamKey, groupName, consumerName, count: 1);
+                    var entries = await Db.StreamReadGroupAsync(streamKey, groupName, consumerName, count: 10);
 
                     if (entries.Length == 0)
                     {
@@ -81,7 +81,7 @@ namespace WonderK.Common.Libraries
                         }
                     }
 
-                    await Task.Delay(500); // Polling interval
+                    await Task.Delay(250); // Polling interval
                 }
             }
         }
