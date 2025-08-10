@@ -129,7 +129,7 @@ Heavy: Weight>=10
 With this rule in place, parcels meeting the criteria will be routed to the Security department for processing.
 
 
-## Why redis?
+## Why Redis?
 
 Redis was chosen for this example project to keep things simple. The design uses dependency injection, making it straightforward to swap Redis for other implementations if needed. In real-world scenarios, more robust messaging systems like Kafka or RabbitMQ are often preferred, as they provide advanced features such as durability, scalability, and message delivery guarantees.
 
@@ -137,6 +137,41 @@ Redis was chosen for this example project to keep things simple. The design uses
 ## Generating Sample Input XML Files
 
 To generate sample parcel data for testing, use the provided Python script located at `tools\fake-data-generator\main.py`. This script creates realistic XML files containing parcel information. You can adjust the parameters to generate different sizes and types of sample data as needed for development and testing.
+
+
+## Screenshots
+
+### Upload
+
+![Upload Screen](images/screen-upload.png)
+
+This is the upload page where users can submit an XML file containing parcel data. The interface displays the upload progress as the file is chunked and processed, enabling efficient handling of large files without timeouts or browser issues.
+
+### Process Log
+
+![Process Log Screen](images/screen-log.png)
+
+This page allows you to view and trace parcels as they move through the system. You can filter the list by parcel information or internal ID, making it easy to locate and monitor specific parcels throughout their processing lifecycle.
+
+### Queue Dashboard
+
+![Queue Dashboard Screen](images/screen-queue.png)
+
+This page displays the status of all parcel queues in the system. You can view the number of consumers attached to each queue, as well as statistics on how many items have been processed or remain pending. This helps monitor throughput and identify any bottlenecks or backlogs in parcel handling.
+
+### Rules
+
+![Rules Screen](images/screen-rules.png)
+
+![Rules Error Screen](images/screen-rules-error.png)
+
+On this page, you can view and edit the rule book directly. The interface highlights any errors encountered while parsing the rules, making it straightforward to identify and correct mistakes.
+
+### Docker
+
+![Docker Desktop Screenshot](images/screen-docker.png)
+
+This image is a screenshot from the Docker Desktop application. It illustrates how the project is set up and managed using `docker-compose`, showing the running containers and their statuses as part of the development environment.
 
 
 ## TODO
