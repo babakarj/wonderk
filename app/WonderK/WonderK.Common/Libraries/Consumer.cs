@@ -1,9 +1,12 @@
-﻿using WonderK.Common.Data;
+﻿using Microsoft.Extensions.Logging;
+using WonderK.Common.Data;
 
 namespace WonderK.Common.Libraries
 {
-    public abstract class Consumer(IQueueProcessor queue, IProcessLogger processLogger)
+    public abstract class Consumer(IQueueProcessor queue, IProcessLogger processLogger, ILogger<Consumer> logger)
     {
+        private readonly ILogger<Consumer> _logger = logger;
+
         public IQueueProcessor Queue { get; } = queue;
         public IProcessLogger ProcessLogger { get; } = processLogger;
 
@@ -41,11 +44,11 @@ namespace WonderK.Common.Libraries
 
                 await Queue.Produce(streamKey, package.ToString());
 
-                Console.WriteLine($"Forwarding package to {nextConsumer}.");
+                _logger.LogDebug($"Forwarding package to {nextConsumer}.");
             }
             else
             {
-                Console.WriteLine("No more consumers to forward the package to.");
+                _logger.LogDebug("No more consumers to forward the package to.");
             }
         }
     }

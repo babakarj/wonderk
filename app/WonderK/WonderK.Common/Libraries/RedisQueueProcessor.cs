@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace WonderK.Common.Libraries
 {
@@ -6,10 +7,13 @@ namespace WonderK.Common.Libraries
     {
         private const string DataFieldName = "data";
 
+        private readonly ILogger<RedisQueueProcessor> _logger;
+
         private IDatabase Db { get; }
 
-        public RedisQueueProcessor()
+        public RedisQueueProcessor(ILogger<RedisQueueProcessor> logger)
         {
+            _logger = logger;
             var port = Environment.GetEnvironmentVariable("REDIS_PORT") ?? "6379";
             var redis = ConnectionMultiplexer.Connect("redis:" + port);
             Db = redis.GetDatabase();
@@ -23,7 +27,7 @@ namespace WonderK.Common.Libraries
 
         public async Task Consume(string streamKey, string groupName, string consumerName, Action<string> action)
         {
-            Console.WriteLine($"Listening to stream '{streamKey}' by '{groupName}|{consumerName}'...");
+            _logger.LogDebug($"Listening to stream '{streamKey}' by '{groupName}|{consumerName}'...");
 
             long ten_seconds = (long)TimeSpan.FromSeconds(10).TotalMilliseconds;
 
@@ -33,11 +37,11 @@ namespace WonderK.Common.Libraries
                 try
                 {
                     await Db.StreamCreateConsumerGroupAsync(streamKey, groupName, "$" /* start at new messages */);
-                    Console.WriteLine($"Consumer group '{groupName}' created.");
+                    _logger.LogDebug($"Consumer group '{groupName}' created.");
                 }
                 catch (RedisServerException ex) when (ex.Message.Contains("BUSYGROUP"))
                 {
-                    Console.WriteLine($"Consumer group '{groupName}' already exists.");
+                    _logger.LogDebug($"Consumer group '{groupName}' already exists.");
                 }
 
                 while (true)
@@ -60,13 +64,13 @@ namespace WonderK.Common.Libraries
 
                         if (data == null)
                         {
-                            Console.WriteLine($"No '{DataFieldName}' field found in message {entry.Id}. Skipping.");
+                            _logger.LogDebug($"No '{DataFieldName}' field found in message {entry.Id}. Skipping.");
 
                             await Db.StreamAcknowledgeAsync(streamKey, groupName, entry.Id);
                         }
                         else
                         {
-                            Console.WriteLine($"Claimed message {entry.Id} by consumer {groupName}-{consumerName}, data: {data}");
+                            _logger.LogDebug($"Claimed message {entry.Id} by consumer {groupName}-{consumerName}, data: {data}");
 
                             try
                             {
@@ -76,7 +80,7 @@ namespace WonderK.Common.Libraries
                             }
                             catch (Exception ex)
                             {
-                                Console.WriteLine($"Error processing message {entry.Id}: {ex.Message}");
+                                _logger.LogError(ex, $"Error processing message {entry.Id}");
                             }
                         }
                     }

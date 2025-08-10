@@ -1,9 +1,11 @@
-﻿using WonderK.Common.Data;
+﻿using Microsoft.Extensions.Logging;
+using WonderK.Common.Data;
 using WonderK.Common.Libraries;
 
 namespace WonderK.Department.Regular
 {
-    public class RegularConsumer(IQueueProcessor queue, IProcessLogger processLogger) : Consumer(queue, processLogger)
+    public class RegularConsumer(IQueueProcessor queue, IProcessLogger processLogger, ILogger<Consumer> logger)
+        : Consumer(queue, processLogger, logger)
     {
         public override async Task Process(Package package)
         {
